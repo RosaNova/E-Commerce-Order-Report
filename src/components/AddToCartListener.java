@@ -1,4 +1,4 @@
 package components;
 public interface AddToCartListener {
-      void onAddToCart(String title, double price);
+      void onAddToCart(String title, double price, int amount);
 }

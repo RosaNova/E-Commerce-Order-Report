@@ -12,30 +12,57 @@ public class ProductCard extends javax.swing.JPanel {
     private AddToCartListener listener;
     private String title;
     private double price;
+    private int stockQty;
 
     public ProductCard(
-            String imagePath,
-            String title, double price,
-            int amountValue,
-            AddToCartListener listener) {
+        String imagePath,
+        String title,
+        double price,
+        int stockQty,
+        AddToCartListener listener) {
 
-        initComponents();
-        this.listener = listener;
+    initComponents();
+    this.listener = listener;
+    this.title = title;
+    this.price = price;
+    this.stockQty = stockQty;
 
-        // Load and scale image
-        ImageIcon icon;
-        icon = new ImageIcon(getClass().getResource("/assets/" + imagePath));
-        Image imgScaled = icon.getImage().getScaledInstance(233, 162, Image.SCALE_SMOOTH);
+    loadImage(imagePath);
 
-        ImageCard.setIcon(new ImageIcon(imgScaled));
+    title_field.setText(title);
+    Price.setText(String.format("%.2f$", price));
 
-        title_field.setText(title);
-        // Set price text
-        Price.setText(String.format("%.2f$", price));
+    int safeMax = Math.max(stockQty, 1);
 
-        // Set amount spinner value
-        amount.setValue(amountValue);
+    
+    // Optional: increase button size
+    amount.setPreferredSize(new java.awt.Dimension(60, 25));
+}
+    private void loadImage(String imagePath) {
+        try {
+            ImageIcon icon;
+            // 1. If URL (http/https)
+            if (imagePath.startsWith("http")) {
+                icon = new ImageIcon(new java.net.URL(imagePath));
+            } // 2. If absolute/local file path
+            else if (new java.io.File(imagePath).exists()) {
+                icon = new ImageIcon(imagePath);
+            } // 3. Classpath resource (/assets/...)
+            else {
+                icon = new ImageIcon(getClass().getResource("/assets/" + imagePath));
+            }
 
+            Image imgScaled = icon.getImage()
+                    .getScaledInstance(233, 162, Image.SCALE_SMOOTH);
+            ImageCard.setIcon(new ImageIcon(imgScaled));
+
+        } catch (Exception e) {
+            // Fallback image
+            ImageIcon fallback = new ImageIcon(
+                    getClass().getResource("/assets/no-image.png")
+            );
+            ImageCard.setIcon(fallback);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -60,6 +87,8 @@ public class ProductCard extends javax.swing.JPanel {
 
         Price.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         Price.setText("20.50$");
+
+        amount.setValue(1);
 
         jLabel3.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jLabel3.setText("Amount");
@@ -120,7 +149,8 @@ public class ProductCard extends javax.swing.JPanel {
 
     private void AddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddBtnActionPerformed
         if (listener != null) {
-            listener.onAddToCart(title, price);
+            int orderQty = (int) amount.getValue();
+            listener.onAddToCart(title, price, orderQty);
         }
         // TODO add your handling code here:
     }//GEN-LAST:event_AddBtnActionPerformed
